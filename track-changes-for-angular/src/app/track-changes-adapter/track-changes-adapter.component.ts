@@ -18,133 +18,18 @@ import { getTrackChangesAdapter } from './track-changes-adapter'
   styleUrls: ['./track-changes-adapter.component.css'],
 })
 export class TrackChangesAdapterComponent implements AfterViewInit, OnDestroy {
-  @Output() public ready = new EventEmitter<CKEditor5.Editor>()
-  @ViewChild('sidebar', { static: true }) private sidebarContainer?: ElementRef<
-    HTMLDivElement
-  >
+  @Output()
+  ready = new EventEmitter<CKEditor5.Editor>()
 
-  public Editor = ClassicEditorBuild
-  public editor?: CKEditor5.Editor
+  @ViewChild('sidebar', { static: true })
+  private sidebarContainer?: ElementRef<HTMLDivElement>
 
-  public data = this.getInitialData()
+  Editor = ClassicEditorBuild
+  editor?: CKEditor5.Editor
+  data = this.getInitialData()
 
-  public get editorConfig() {
-    return {
-      extraPlugins: [getTrackChangesAdapter(this.appData)],
-      sidebar: {
-        container: this.sidebar,
-      },
-      licenseKey: this.licenseKey,
-    }
-  }
-
-  private readonly STORAGE_KEY = 'ckeditor-license-key'
-  private licenseKey = ''
-
-  private appData = {
-    // The ID of the current user.
-    userId: 'user-1',
-    // Users data.
-    users: [
-      {
-        id: 'user-1',
-        name: 'Joe Doe',
-        // Note that the avatar is optional.
-        avatar: 'https://randomuser.me/api/portraits/thumb/men/26.jpg',
-      },
-      {
-        id: 'user-2',
-        name: 'Ella Harper',
-        avatar: 'https://randomuser.me/api/portraits/thumb/women/65.jpg',
-      },
-    ],
-    // Suggestion threads data.
-    suggestions: [
-      {
-        id: 'suggestion-1',
-        type: 'insertion',
-        authorId: 'user-2',
-        createdAt: new Date(2019, 1, 13, 11, 20, 48),
-        hasComments: true,
-      },
-      {
-        id: 'suggestion-2',
-        type: 'deletion',
-        authorId: 'user-1',
-        createdAt: new Date(2019, 1, 14, 12, 7, 20),
-        hasComments: false,
-      },
-      {
-        id: 'suggestion-3',
-        type: 'insertion',
-        authorId: 'user-1',
-        createdAt: new Date(2019, 1, 14, 12, 7, 20),
-        hasComments: false,
-      },
-      {
-        id: 'suggestion-4',
-        type: 'deletion',
-        authorId: 'user-1',
-        createdAt: new Date(2019, 1, 15, 8, 44, 1),
-        hasComments: true,
-      },
-      {
-        id: 'suggestion-5',
-        type: 'formatInline:886cqig6g8rf',
-        authorId: 'user-2',
-        hasComments: false,
-        createdAt: new Date(2019, 2, 8, 10, 2, 7),
-        data: {
-          commandName: 'bold',
-          commandParams: [{ forceValue: true }],
-        },
-      },
-      {
-        id: 'suggestion-6',
-        type: 'formatBlock:698dn3otqzd6',
-        authorId: 'user-2',
-        hasComments: false,
-        createdAt: new Date(2019, 2, 8, 10, 2, 10),
-        data: {
-          commandName: 'heading',
-          commandParams: [{ value: 'heading2' }],
-          formatGroupId: 'blockName',
-          multipleBlocks: false,
-        },
-      },
-    ],
-    // Comment threads data.
-    comments: [
-      {
-        threadId: 'suggestion-1',
-        comments: [
-          {
-            commentId: 'comment-1',
-            content: 'Sounds good.',
-            authorId: 'user-1',
-            createdAt: new Date(2019, 1, 13, 11, 32, 57),
-          },
-        ],
-      },
-      {
-        threadId: 'suggestion-4',
-        comments: [
-          {
-            commentId: 'comment-2',
-            content: "I think it's not relevant.",
-            authorId: 'user-2',
-            createdAt: new Date(2019, 1, 15, 9, 3, 1),
-          },
-          {
-            commentId: 'comment-3',
-            content: 'You are right. Thanks.',
-            authorId: 'user-1',
-            createdAt: new Date(2019, 1, 15, 9, 28, 1),
-          },
-        ],
-      },
-    ],
-  }
+  private readonly licenseKey = 'ckeditor-license-key'
+  private licenseValue = ''
 
   // Note that Angular refs can be used once the view is initialized so we need to create
   // this container and use in the above editor configuration to work around this problem.
@@ -153,14 +38,14 @@ export class TrackChangesAdapterComponent implements AfterViewInit, OnDestroy {
   private boundRefreshDisplayMode = this.refreshDisplayMode.bind(this)
   private boundCheckPendingActions = this.checkPendingActions.bind(this)
 
-  public ngOnInit() {
+  ngOnInit() {
     // Save the provided license key in the local storage.
-    this.licenseKey =
-      window.localStorage.getItem(this.STORAGE_KEY) || window.prompt('Your license key')
-    window.localStorage.setItem(this.STORAGE_KEY, this.licenseKey)
+    this.licenseValue =
+      window.localStorage.getItem(this.licenseKey) || window.prompt('Your license key')
+    window.localStorage.setItem(this.licenseKey, this.licenseValue)
   }
 
-  public ngAfterViewInit() {
+  ngAfterViewInit() {
     if (!this.sidebarContainer) {
       throw new Error('Div container for sidebar was not found')
     }
@@ -168,12 +53,12 @@ export class TrackChangesAdapterComponent implements AfterViewInit, OnDestroy {
     this.sidebarContainer.nativeElement.appendChild(this.sidebar)
   }
 
-  public ngOnDestroy() {
+  ngOnDestroy() {
     window.removeEventListener('resize', this.boundRefreshDisplayMode)
     window.removeEventListener('beforeunload', this.boundCheckPendingActions)
   }
 
-  public onReady(editor: CKEditor5.Editor) {
+  onReady(editor: CKEditor5.Editor) {
     this.editor = editor
     this.ready.emit(editor)
 
@@ -188,8 +73,8 @@ export class TrackChangesAdapterComponent implements AfterViewInit, OnDestroy {
     this.refreshDisplayMode()
   }
 
-  public resetLicenseKey() {
-    window.localStorage.removeItem(this.STORAGE_KEY)
+  resetLicenseKey() {
+    window.localStorage.removeItem(this.licenseKey)
     window.location.reload()
   }
 
@@ -300,5 +185,120 @@ export class TrackChangesAdapterComponent implements AfterViewInit, OnDestroy {
 			substantially and the language a person speaks is an essential element of daily life.
 		</p>
 	`
+  }
+
+  private appData = {
+    // The ID of the current user.
+    userId: 'user-1',
+    // Users data.
+    users: [
+      {
+        id: 'user-1',
+        name: 'Joe Doe',
+        // Note that the avatar is optional.
+        avatar: 'https://randomuser.me/api/portraits/thumb/men/26.jpg',
+      },
+      {
+        id: 'user-2',
+        name: 'Ella Harper',
+        avatar: 'https://randomuser.me/api/portraits/thumb/women/65.jpg',
+      },
+    ],
+    // Suggestion threads data.
+    suggestions: [
+      {
+        id: 'suggestion-1',
+        type: 'insertion',
+        authorId: 'user-2',
+        createdAt: new Date(2019, 1, 13, 11, 20, 48),
+        hasComments: true,
+      },
+      {
+        id: 'suggestion-2',
+        type: 'deletion',
+        authorId: 'user-1',
+        createdAt: new Date(2019, 1, 14, 12, 7, 20),
+        hasComments: false,
+      },
+      {
+        id: 'suggestion-3',
+        type: 'insertion',
+        authorId: 'user-1',
+        createdAt: new Date(2019, 1, 14, 12, 7, 20),
+        hasComments: false,
+      },
+      {
+        id: 'suggestion-4',
+        type: 'deletion',
+        authorId: 'user-1',
+        createdAt: new Date(2019, 1, 15, 8, 44, 1),
+        hasComments: true,
+      },
+      {
+        id: 'suggestion-5',
+        type: 'formatInline:886cqig6g8rf',
+        authorId: 'user-2',
+        hasComments: false,
+        createdAt: new Date(2019, 2, 8, 10, 2, 7),
+        data: {
+          commandName: 'bold',
+          commandParams: [{ forceValue: true }],
+        },
+      },
+      {
+        id: 'suggestion-6',
+        type: 'formatBlock:698dn3otqzd6',
+        authorId: 'user-2',
+        hasComments: false,
+        createdAt: new Date(2019, 2, 8, 10, 2, 10),
+        data: {
+          commandName: 'heading',
+          commandParams: [{ value: 'heading2' }],
+          formatGroupId: 'blockName',
+          multipleBlocks: false,
+        },
+      },
+    ],
+    // Comment threads data.
+    comments: [
+      {
+        threadId: 'suggestion-1',
+        comments: [
+          {
+            commentId: 'comment-1',
+            content: 'Sounds good.',
+            authorId: 'user-1',
+            createdAt: new Date(2019, 1, 13, 11, 32, 57),
+          },
+        ],
+      },
+      {
+        threadId: 'suggestion-4',
+        comments: [
+          {
+            commentId: 'comment-2',
+            content: "I think it's not relevant.",
+            authorId: 'user-2',
+            createdAt: new Date(2019, 1, 15, 9, 3, 1),
+          },
+          {
+            commentId: 'comment-3',
+            content: 'You are right. Thanks.',
+            authorId: 'user-1',
+            createdAt: new Date(2019, 1, 15, 9, 28, 1),
+          },
+        ],
+      },
+    ],
+  }
+
+  get editorConfig() {
+    return {
+      extraPlugins: [getTrackChangesAdapter(this.appData)],
+      sidebar: {
+        container: this.sidebar,
+      },
+      licenseKey: this.licenseValue,
+    }
   }
 }
