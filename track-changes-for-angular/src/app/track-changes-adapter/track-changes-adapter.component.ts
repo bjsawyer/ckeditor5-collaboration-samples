@@ -29,7 +29,7 @@ export class TrackChangesAdapterComponent implements AfterViewInit, OnDestroy {
   data = this.getInitialData()
 
   private readonly licenseKey = 'ckeditor-license-key'
-  private licenseValue = ''
+  private licenseValue = '1R5JdtfXfK7Ji9wfJGazaiv/BdyIK6/IoGa1g7VzQoC8czRaSJCcygo='
 
   // Note that Angular refs can be used once the view is initialized so we need to create
   // this container and use in the above editor configuration to work around this problem.

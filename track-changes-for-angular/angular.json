@@ -66,6 +66,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "track-changes-for-angular"
+    }
+  },
+  "defaultProject": "track-changes-for-angular",
+  "cli": {
+    "analytics": false
+  }
 }
