@@ -4,6 +4,7 @@ import {
   ElementRef,
   EventEmitter,
   OnDestroy,
+  OnInit,
   Output,
   ViewChild,
 } from '@angular/core'
@@ -17,7 +18,7 @@ import { getTrackChangesAdapter } from './track-changes-adapter'
   templateUrl: './track-changes-adapter.component.html',
   styleUrls: ['./track-changes-adapter.component.css'],
 })
-export class TrackChangesAdapterComponent implements AfterViewInit, OnDestroy {
+export class TrackChangesAdapterComponent implements OnInit, AfterViewInit, OnDestroy {
   get editorConfig() {
     return {
       extraPlugins: [getTrackChangesAdapter(this.appData)],
