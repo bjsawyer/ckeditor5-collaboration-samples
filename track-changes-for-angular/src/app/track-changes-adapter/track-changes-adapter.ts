@@ -18,15 +18,9 @@ export function getTrackChangesAdapter(appData) {
         usersPlugin.addUser(user)
       }
 
-      // Set the current user.
-      usersPlugin.defineMe(appData.userId)
-
-      // Set the adapter to the `TrackChanges#adapter` property.
-      trackChangesPlugin.adapter = this.buildTrackChangesAdapter()
-
-      // Track changes uses comments to allow discussing about the suggestions.
-      // The comments adapter has to be defined as well.
-      commentsRepositoryPlugin.adapter = this.buildCommentsAdapter()
+      usersPlugin.defineMe(appData.userId) // Set the current user.
+      trackChangesPlugin.adapter = this.buildTrackChangesAdapter() // Set the adapter to the `TrackChanges#adapter` property.
+      commentsRepositoryPlugin.adapter = this.buildCommentsAdapter() // Track changes uses comments to allow discussing about the suggestions.
     }
 
     private buildTrackChangesAdapter(): any {
