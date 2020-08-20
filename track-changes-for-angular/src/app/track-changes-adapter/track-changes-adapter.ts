@@ -1,50 +1,76 @@
 import { CKEditor5 } from '@ckeditor/ckeditor5-angular'
+import { of } from 'rxjs'
 
-export function getTrackChangesAdapter(appData) {
+export interface ITrackChangesData {
+  userId: string
+  users: { id: string; name: string }[]
+  suggestions: {
+    id: string
+    type: string
+    authorId: string
+    createdAt: Date
+    hasComments: boolean
+    data?: {
+      commandName: string
+      commandParams: { value?: string; forceValue?: boolean }[]
+      formatGroupId?: string
+      multipleBlocks?: false
+    }
+  }[]
+  comments: {
+    threadId: string
+    comments: {
+      commentId: string
+      content: string
+      authorId: string
+      createdAt: Date
+    }[]
+  }[]
+}
+
+export function getTrackChangesAdapter(initialData?: ITrackChangesData) {
   return class TrackChangesAdapter {
     editor: CKEditor5.Editor
+    initialData: ITrackChangesData
 
     constructor(editor: CKEditor5.Editor) {
       this.editor = editor
+      this.initialData = initialData
     }
 
-    init() {
+    init(): void {
       const usersPlugin = this.editor.plugins.get('Users')
       const trackChangesPlugin = this.editor.plugins.get('TrackChanges')
       const commentsRepositoryPlugin = this.editor.plugins.get('CommentsRepository')
 
-      // Load the users data.
-      for (const user of appData.users) {
-        usersPlugin.addUser(user)
+      for (const user of this.initialData.users) {
+        usersPlugin.addUser(user) // Load the users data
       }
 
-      usersPlugin.defineMe(appData.userId) // Set the current user.
-      trackChangesPlugin.adapter = this.buildTrackChangesAdapter() // Set the adapter to the `TrackChanges#adapter` property.
-      commentsRepositoryPlugin.adapter = this.buildCommentsAdapter() // Track changes uses comments to allow discussing about the suggestions.
+      usersPlugin.defineMe(this.initialData.userId) // Set the current user
+      trackChangesPlugin.adapter = this.buildTrackChangesAdapter()
+      commentsRepositoryPlugin.adapter = this.buildCommentsAdapter()
     }
 
     private buildTrackChangesAdapter(): any {
       return {
         getSuggestion: (suggestionId) => {
-          // This function should query the database for data for a suggestion with a `suggestionId`.
-          console.log('Get suggestion', suggestionId)
-          return new Promise((resolve) => {
-            resolve(
-              appData.suggestions.find((suggestion) => suggestionId === suggestion.id)
+          // This function should query the database for data for a suggestion with a `suggestionId`
+          return of(
+            this.initialData.suggestions.find(
+              (suggestion) => suggestionId === suggestion.id
             )
-          })
+          ).toPromise()
         },
         addSuggestion: (suggestionData) => {
           // This function should save `suggestionData` in the database.
-          console.log('Suggestion added', suggestionData)
-          return Promise.resolve({
+          return of({
             createdAt: new Date(),
-          })
+          }).toPromise()
         },
         updateSuggestion: (id, suggestionData) => {
           // This function should update `suggestionData` in the database.
-          console.log('Suggestion updated', id, suggestionData)
-          return Promise.resolve()
+          return of().toPromise()
         },
       }
     }
@@ -53,32 +79,27 @@ export function getTrackChangesAdapter(appData) {
       return {
         getCommentThread: ({ threadId }) => {
           // This function should query the database for data for the comment thread with a `commentThreadId`.
-          console.log('Get comment thread', threadId)
-          return new Promise((resolve) => {
-            resolve(appData.comments.find((comment) => threadId === comment.threadId))
-          })
+          return of(
+            this.initialData.comments.find((comment) => threadId === comment.threadId)
+          ).toPromise()
         },
         addComment: (data) => {
           // This function should save `data` in the database.
-          console.log('Comment added', data)
-          return Promise.resolve({
+          return of({
             createdAt: new Date(),
-          })
+          }).toPromise()
         },
         updateComment: (data) => {
           // This function should save `data` in the database.
-          console.log('Comment updated', data)
-          return Promise.resolve()
+          return of().toPromise()
         },
         removeComment: (data) => {
           // This function should remove the comment of a given `data` from the database.
-          console.log('Comment removed', data)
-          return Promise.resolve()
+          return of().toPromise()
         },
         removeCommentThread: (data) => {
           // This function should remove the comment of a given `data` from the database.
-          console.log('Comment thread removed', data)
-          return Promise.resolve()
+          return of().toPromise()
         },
       }
     }

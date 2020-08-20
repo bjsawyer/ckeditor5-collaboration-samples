@@ -1,3 +1,5 @@
+import { ITrackChangesData } from './track-changes-adapter'
+
 export const initialHtml = `
 <h2>
   Bilingual Personality Disorder
@@ -80,7 +82,7 @@ export const initialHtml = `
   </p>
 `
 
-export const initialData = {
+export const initialData: ITrackChangesData = {
   // The ID of the current user.
   userId: 'user-1',
   // Users data.

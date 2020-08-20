@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core'
 import { FormControl } from '@angular/forms'
 import { CKEditor5 } from '@ckeditor/ckeditor5-angular'
 
@@ -11,7 +11,7 @@ import { getTrackChangesAdapter } from './track-changes-adapter'
   templateUrl: './track-changes-adapter.component.html',
   styleUrls: ['./track-changes-adapter.component.css'],
 })
-export class TrackChangesAdapterComponent implements OnInit, OnDestroy {
+export class TrackChangesAdapterComponent implements OnDestroy {
   @Input() control: FormControl
   @Output() ready = new EventEmitter<CKEditor5.Editor>()
 
@@ -20,8 +20,6 @@ export class TrackChangesAdapterComponent implements OnInit, OnDestroy {
 
   private boundCheckPendingActions = this.checkPendingActions.bind(this)
 
-  ngOnInit(): void {}
-
   ngOnDestroy(): void {
     window.removeEventListener('beforeunload', this.boundCheckPendingActions)
   }
@@ -29,11 +27,12 @@ export class TrackChangesAdapterComponent implements OnInit, OnDestroy {
   onReady(editor: CKEditor5.Editor): void {
     this.editor = editor
     this.ready.emit(editor)
-    this.editor.execute('trackChanges') // Make the track changes mode the "default" state by turning it on right after the editor initializes.
-    window.addEventListener('beforeunload', this.boundCheckPendingActions) // Prevent closing the tab when any action is pending.
+    this.editor.execute('trackChanges')
+    window.addEventListener('beforeunload', this.boundCheckPendingActions)
   }
 
   private checkPendingActions(event: Event): void {
+    // Prevents user from leaving page if there are pending actions
     const pendingActionsPlugin = this.editor.plugins.get('PendingActions')
     if (pendingActionsPlugin.hasAny) {
       event.preventDefault()
