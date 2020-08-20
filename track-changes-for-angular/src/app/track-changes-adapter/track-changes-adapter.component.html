@@ -1,9 +1,12 @@
 <main>
   <div class="centered">
     <div class='row row-editor'>
-      <ckeditor [editor]="editorBuild" (ready)="onReady($event)" [config]="editorConfig"
-        [data]="intialHtml"></ckeditor>
-      <div #sidebar class='sidebar'></div>
+      <ckeditor
+        [editor]="editorBuild"
+        (ready)="onReady($event)"
+        [config]="editorConfig"
+        [formControl]="control"
+      ></ckeditor>
     </div>
   </div>
 </main>

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
+import { FormControl } from '@angular/forms'
 import { CKEditor5 } from '@ckeditor/ckeditor5-angular'
 
 import * as ClassicEditorWithTrackChanges from '../../../vendor/ckeditor5/build/classic-editor-with-track-changes.js'
@@ -11,7 +12,7 @@ import { getTrackChangesAdapter } from './track-changes-adapter'
   styleUrls: ['./track-changes-adapter.component.css'],
 })
 export class TrackChangesAdapterComponent implements OnInit, OnDestroy {
-  @Input() intialHtml = ''
+  @Input() control: FormControl
   @Output() ready = new EventEmitter<CKEditor5.Editor>()
 
   editorBuild = ClassicEditorWithTrackChanges
