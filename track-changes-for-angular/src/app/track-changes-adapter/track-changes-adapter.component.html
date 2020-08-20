@@ -1,8 +1,8 @@
 <main>
   <div class="centered">
     <div class='row row-editor'>
-      <ckeditor [editor]="CustomEditorBuild" (ready)="onReady($event)"
-        [config]="editorConfig" [data]="intialHtml"></ckeditor>
+      <ckeditor [editor]="editorBuild" (ready)="onReady($event)" [config]="editorConfig"
+        [data]="intialHtml"></ckeditor>
       <div #sidebar class='sidebar'></div>
     </div>
   </div>

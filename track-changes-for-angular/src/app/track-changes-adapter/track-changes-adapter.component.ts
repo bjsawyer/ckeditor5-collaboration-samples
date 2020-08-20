@@ -13,8 +13,10 @@ import { getTrackChangesAdapter } from './track-changes-adapter'
 export class TrackChangesAdapterComponent implements OnInit, OnDestroy {
   @Input() intialHtml = ''
   @Output() ready = new EventEmitter<CKEditor5.Editor>()
-  CustomEditorBuild = ClassicEditorWithTrackChanges
+
+  editorBuild = ClassicEditorWithTrackChanges
   editor?: CKEditor5.Editor
+
   private boundCheckPendingActions = this.checkPendingActions.bind(this)
 
   ngOnInit(): void {}
@@ -31,7 +33,8 @@ export class TrackChangesAdapterComponent implements OnInit, OnDestroy {
   }
 
   private checkPendingActions(event: Event): void {
-    if (this.editor.plugins.get('PendingActions').hasAny) {
+    const pendingActionsPlugin = this.editor.plugins.get('PendingActions')
+    if (pendingActionsPlugin.hasAny) {
       event.preventDefault()
       event.returnValue = true
     }

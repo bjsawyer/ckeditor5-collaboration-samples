@@ -13,8 +13,6 @@ export class MenuComponent implements OnInit {
   private licenseValue = '1R5JdtfXfK7Ji9wfJGazaiv/BdyIK6/IoGa1g7VzQoC8czRaSJCcygo='
 
   ngOnInit(): void {
-    // Save the provided license key in the local storage.
-    this.licenseValue = window.localStorage.getItem(this.licenseKey)
     window.localStorage.setItem(this.licenseKey, this.licenseValue)
   }
 }
