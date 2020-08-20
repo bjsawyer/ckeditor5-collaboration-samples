@@ -4,12 +4,6 @@ export const initialHtml = `
 <h2>
   Bilingual Personality Disorder
 </h2>
-  <figure class="image image-style-side">
-    <img src="https://c.cksource.com/a/1/img/docs/sample-image-bilingual-personality-disorder.jpg">
-    <figcaption>
-      One language, one person.
-    </figcaption>
-  </figure>
   <p>
     This may be the first time you hear about this made-up disorder but it
     <suggestion id="suggestion-1:user-2" suggestion-type="insertion" type="start"></suggestion>actually<suggestion id="suggestion-1:user-2" suggestion-type="insertion" type="end"></suggestion>
