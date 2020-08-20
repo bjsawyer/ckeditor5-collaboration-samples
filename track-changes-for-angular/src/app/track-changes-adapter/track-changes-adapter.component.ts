@@ -33,6 +33,11 @@ export class TrackChangesAdapterComponent implements OnDestroy {
     window.addEventListener('beforeunload', this.boundCheckPendingActions)
   }
 
+  // TODO: Remove (only used for testing purposes)
+  displayHtmlInConsole(): void {
+    console.log(this.control.value)
+  }
+
   private checkPendingActions(event: Event): void {
     // Prevents user from leaving page if there are pending actions
     const pendingActionsPlugin = this.editor.plugins.get('PendingActions')
