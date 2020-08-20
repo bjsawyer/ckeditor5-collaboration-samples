@@ -20,6 +20,8 @@ export class TrackChangesAdapterComponent implements OnDestroy {
 
   private boundCheckPendingActions = this.checkPendingActions.bind(this)
 
+  constructor() {}
+
   ngOnDestroy(): void {
     window.removeEventListener('beforeunload', this.boundCheckPendingActions)
   }
