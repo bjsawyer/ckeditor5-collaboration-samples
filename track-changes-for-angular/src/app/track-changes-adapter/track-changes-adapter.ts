@@ -22,11 +22,18 @@ export function getTrackChangesAdapter(appData) {
       usersPlugin.defineMe(appData.userId)
 
       // Set the adapter to the `TrackChanges#adapter` property.
-      trackChangesPlugin.adapter = {
+      trackChangesPlugin.adapter = this.buildTrackChangesAdapter()
+
+      // Track changes uses comments to allow discussing about the suggestions.
+      // The comments adapter has to be defined as well.
+      commentsRepositoryPlugin.adapter = this.buildCommentsAdapter()
+    }
+
+    private buildTrackChangesAdapter(): any {
+      return {
         getSuggestion: (suggestionId) => {
           // This function should query the database for data for a suggestion with a `suggestionId`.
           console.log('Get suggestion', suggestionId)
-
           return new Promise((resolve) => {
             resolve(
               appData.suggestions.find((suggestion) => suggestionId === suggestion.id)
@@ -36,26 +43,23 @@ export function getTrackChangesAdapter(appData) {
         addSuggestion: (suggestionData) => {
           // This function should save `suggestionData` in the database.
           console.log('Suggestion added', suggestionData)
-
           return Promise.resolve({
-            createdAt: new Date(), // Should be set server-side.
+            createdAt: new Date(),
           })
         },
         updateSuggestion: (id, suggestionData) => {
           // This function should update `suggestionData` in the database.
           console.log('Suggestion updated', id, suggestionData)
-
           return Promise.resolve()
         },
       }
+    }
 
-      // Track changes uses comments to allow discussing about the suggestions.
-      // The comments adapter has to be defined as well.
-      commentsRepositoryPlugin.adapter = {
+    private buildCommentsAdapter(): any {
+      return {
         getCommentThread: ({ threadId }) => {
           // This function should query the database for data for the comment thread with a `commentThreadId`.
           console.log('Get comment thread', threadId)
-
           return new Promise((resolve) => {
             resolve(appData.comments.find((comment) => threadId === comment.threadId))
           })
@@ -64,7 +68,7 @@ export function getTrackChangesAdapter(appData) {
           // This function should save `data` in the database.
           console.log('Comment added', data)
           return Promise.resolve({
-            createdAt: new Date(), // Should be set server-side.
+            createdAt: new Date(),
           })
         },
         updateComment: (data) => {

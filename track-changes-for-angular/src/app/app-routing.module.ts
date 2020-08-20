@@ -8,7 +8,6 @@ import { TrackChangesAdapterComponent } from './track-changes-adapter/track-chan
 const routes: Routes = [
   { path: '', component: MenuComponent },
   { path: 'load-save-integration', component: LoadSaveIntegrationComponent },
-  { path: 'track-changes-adapter', component: TrackChangesAdapterComponent },
 ]
 
 @NgModule({

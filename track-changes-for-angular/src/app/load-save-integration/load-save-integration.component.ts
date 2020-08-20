@@ -13,7 +13,7 @@ import * as ClassicEditorBuild from '../../../vendor/ckeditor5/build/classic-edi
 import { getLoadSaveIntegration } from './load-save-integration'
 
 @Component({
-  selector: 'load-save-integration',
+  selector: 'app-load-save-integration',
   templateUrl: './load-save-integration.component.html',
   styleUrls: ['./load-save-integration.component.css'],
 })

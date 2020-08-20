@@ -1,19 +1,9 @@
 <main>
-  <div class="message">
-    <div class="centered">
-      <h1>CKEditor 5 track changes adapter integration for Angular</h1>
-    </div>
-  </div>
   <div class="centered">
     <div class='row row-editor'>
       <ckeditor [editor]="CustomEditorBuild" (ready)="onReady($event)"
         [config]="editorConfig" [data]="intialHtml"></ckeditor>
       <div #sidebar class='sidebar'></div>
-    </div>
-    <div class="row row-info">
-      Your license key is stored in the local storage.
-      <button class="remove-license-key" (click)="resetLicenseKey()">Reset license
-        key</button>
     </div>
   </div>
 </main>

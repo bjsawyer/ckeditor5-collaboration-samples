@@ -80,7 +80,7 @@ export const initialHtml = `
   </p>
 `
 
-export const intialData = {
+export const initialData = {
   // The ID of the current user.
   userId: 'user-1',
   // Users data.
@@ -88,13 +88,10 @@ export const intialData = {
     {
       id: 'user-1',
       name: 'Joe Doe',
-      // Note that the avatar is optional.
-      avatar: 'https://randomuser.me/api/portraits/thumb/men/26.jpg',
     },
     {
       id: 'user-2',
       name: 'Ella Harper',
-      avatar: 'https://randomuser.me/api/portraits/thumb/women/65.jpg',
     },
   ],
   // Suggestion threads data.

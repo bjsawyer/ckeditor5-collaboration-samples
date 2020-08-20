@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  Input,
   OnDestroy,
   OnInit,
   Output,
@@ -11,7 +12,7 @@ import {
 import { CKEditor5 } from '@ckeditor/ckeditor5-angular'
 
 import * as ClassicEditorWithTrackChanges from '../../../vendor/ckeditor5/build/classic-editor-with-track-changes.js'
-import { initialHtml, intialData } from './data'
+import { initialData } from './data'
 import { getTrackChangesAdapter } from './track-changes-adapter'
 
 @Component({
@@ -20,24 +21,21 @@ import { getTrackChangesAdapter } from './track-changes-adapter'
   styleUrls: ['./track-changes-adapter.component.css'],
 })
 export class TrackChangesAdapterComponent implements OnInit, AfterViewInit, OnDestroy {
+  @Input() intialHtml = ''
   @Output() ready = new EventEmitter<CKEditor5.Editor>()
+
   CustomEditorBuild = ClassicEditorWithTrackChanges
   editor?: CKEditor5.Editor
-  intialHtml = initialHtml
-  private readonly licenseKey = 'ckeditor-license-key'
-  private licenseValue = '1R5JdtfXfK7Ji9wfJGazaiv/BdyIK6/IoGa1g7VzQoC8czRaSJCcygo='
+
   // Note that Angular refs can be used once the view is initialized so we need to create
   // this container and use in the above editor configuration to work around this problem.
   private sidebar = document.createElement('div')
   private boundRefreshDisplayMode = this.refreshDisplayMode.bind(this)
   private boundCheckPendingActions = this.checkPendingActions.bind(this)
+
   @ViewChild('sidebar') private sidebarContainer?: ElementRef<HTMLDivElement>
 
-  ngOnInit(): void {
-    // Save the provided license key in the local storage.
-    this.licenseValue = window.localStorage.getItem(this.licenseKey)
-    window.localStorage.setItem(this.licenseKey, this.licenseValue)
-  }
+  ngOnInit(): void {}
 
   ngAfterViewInit(): void {
     if (!this.sidebarContainer) {
@@ -62,11 +60,6 @@ export class TrackChangesAdapterComponent implements OnInit, AfterViewInit, OnDe
     // Switch between inline and sidebar annotations according to the window size.
     window.addEventListener('resize', this.boundRefreshDisplayMode)
     this.refreshDisplayMode()
-  }
-
-  resetLicenseKey(): void {
-    window.localStorage.removeItem(this.licenseKey)
-    window.location.reload()
   }
 
   private checkPendingActions(event: Event): void {
@@ -96,11 +89,11 @@ export class TrackChangesAdapterComponent implements OnInit, AfterViewInit, OnDe
 
   get editorConfig(): object {
     return {
-      extraPlugins: [getTrackChangesAdapter(intialData)],
+      extraPlugins: [getTrackChangesAdapter(initialData)],
       sidebar: {
         container: this.sidebar,
       },
-      licenseKey: this.licenseValue,
+      licenseKey: window.localStorage.getItem('ckeditor-license-key'),
     }
   }
 }
