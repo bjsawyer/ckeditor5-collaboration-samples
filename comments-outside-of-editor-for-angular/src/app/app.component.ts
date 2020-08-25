@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core'
+import { Component, OnInit, ViewChild } from '@angular/core'
 
 import { CloudServicesConfig } from './editor/common-interfaces'
 import { NgForm } from '@angular/forms'
@@ -10,78 +10,16 @@ const LOCAL_STORAGE_KEY = 'CKEDITOR_CS_CONFIG'
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-  @ViewChild('form') public form?: NgForm
+export class AppComponent implements OnInit {
+  @ViewChild('form') form?: NgForm
+  users = getUsers()
+  private readonly licenseKey = 'ckeditor-license-key'
+  private licenseValue = '1R5JdtfXfK7Ji9wfJGazaiv/BdyIK6/IoGa1g7VzQoC8czRaSJCcygo='
 
-  public configurationSet = false
-  public users = getUsers()
-  public channelId = handleChannelIdInUrl()
-  public config = getStoredConfig()
-  public isWarning = false
+  constructor() {}
 
-  public selectedUser?: string
-
-  public handleSubmit() {
-    if (!this.form || !this.form.valid) {
-      return
-    }
-
-    if (this.isCloudServicesTokenEndpoint() && !this.config.tokenUrl.includes('?')) {
-      this.isWarning = true
-
-      return
-    }
-
-    storeConfig({
-      tokenUrl: getRawTokenUrl(this.config.tokenUrl),
-      uploadUrl: this.config.uploadUrl,
-      webSocketUrl: this.config.webSocketUrl,
-    })
-
-    updateChannelIdInUrl(this.channelId)
-
-    this.configurationSet = true
-  }
-
-  public handleTokenUrlChange() {
-    this.isWarning = false
-    this.selectedUser = undefined
-  }
-
-  public selectUser(user: User) {
-    this.selectedUser = user.id
-    this.isWarning = false
-
-    const keys = Object.keys(user) as (keyof User)[]
-
-    this.config.tokenUrl =
-      `${getRawTokenUrl(this.config.tokenUrl)}?` +
-      keys
-        .filter((key) => user[key])
-        .map((key) => {
-          if (key === 'role') {
-            return `${key}=${user[key]}`
-          }
-
-          return `user.${key}=${user[key]}`
-        })
-        .join('&')
-  }
-
-  public isCloudServicesTokenEndpoint() {
-    return isCloudServicesTokenEndpoint(this.config.tokenUrl)
-  }
-
-  public getUserInitials(name: string) {
-    return name
-      .split(' ', 2)
-      .map((part) => part.charAt(0))
-      .join('')
-      .toUpperCase()
-  }
-
-  public onEditorReady(editor) {
-    console.log('Editor is ready to use!', editor)
+  ngOnInit(): void {
+    window.localStorage.setItem(this.licenseKey, this.licenseValue)
   }
 }
 
@@ -127,57 +65,6 @@ interface User {
   role?: string
 }
 
-function handleChannelIdInUrl() {
-  let id = getChannelIdFromUrl()
-
-  if (!id) {
-    id = randomString()
-    updateChannelIdInUrl(id)
-  }
-
-  return id
-}
-
-function getChannelIdFromUrl() {
-  const channelIdMatch = location.search.match(/channelId=(.+)$/)
-
-  return channelIdMatch ? decodeURIComponent(channelIdMatch[1]) : null
-}
-
 function randomString() {
   return Math.floor(Math.random() * Math.pow(2, 52)).toString(32)
-}
-
-function storeConfig(csConfig: CloudServicesConfig) {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(csConfig))
-}
-
-function updateChannelIdInUrl(id: string) {
-  window.history.replaceState({}, document.title, generateUrlWithChannelId(id))
-}
-
-function generateUrlWithChannelId(id: string) {
-  return `${window.location.href.split('?')[0]}?channelId=${id}`
-}
-
-function getRawTokenUrl(url: string) {
-  if (isCloudServicesTokenEndpoint(url)) {
-    return url.split('?')[0]
-  }
-
-  return url
-}
-
-function isCloudServicesTokenEndpoint(tokenUrl: string) {
-  return /cke-cs[\w-]*\.com\/token\/dev/.test(tokenUrl)
-}
-
-function getStoredConfig(): CloudServicesConfig {
-  const config = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}')
-
-  return {
-    tokenUrl: config.tokenUrl || '',
-    uploadUrl: config.uploadUrl || '',
-    webSocketUrl: config.webSocketUrl || '',
-  }
 }

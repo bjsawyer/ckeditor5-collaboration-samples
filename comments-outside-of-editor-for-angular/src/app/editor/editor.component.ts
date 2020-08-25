@@ -6,6 +6,7 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnInit,
   Output,
   QueryList,
   ViewChild,
@@ -20,60 +21,28 @@ import { CloudServicesConfig } from './common-interfaces'
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css'],
 })
-export class EditorComponent implements AfterViewInit {
-  @Input() configuration!: CloudServicesConfig
-  @Input() channelId!: string
+export class EditorComponent implements OnInit, AfterViewInit {
   @Output() ready = new EventEmitter<CKEditor5.Editor>()
   @ViewChild('sidebar') private sidebarContainer?: ElementRef<HTMLDivElement>
-  @ViewChild('presenceList') private presenceListContainer?: ElementRef<HTMLDivElement>
   @ViewChildren('customControl') private customControls: QueryList<
     ElementRef<HTMLElement>
   >
-
   Editor = CKSource.ClassicEditor
   data = this.getInitialData()
-
-  get editorConfig1() {
-    return {
-      collaboration: {
-        channelId: this.channelId + '-foo',
-      },
-    }
-  }
-
-  get editorConfig2() {
-    return {
-      collaboration: {
-        channelId: this.channelId + '-bar',
-      },
-    }
-  }
-
   watchdog: any
+  private sidebar = document.createElement('div')
 
-  ngOnInit() {
+  ngOnInit(): void {
     const contextConfig = {
-      cloudServices: {
-        ...this.configuration,
-      },
-      collaboration: {
-        channelId: this.channelId,
-      },
       sidebar: {
         container: this.sidebar,
-      },
-      presenceList: {
-        container: this.presenceList,
       },
     }
 
     this.watchdog = new CKSource.ContextWatchdog(CKSource.Context)
-
-    this.watchdog.setCreator(async (config) => {
+    this.watchdog.setCreator(async (config: any) => {
       const context = await CKSource.Context.create(config)
-
       this.initIntegration(context)
-
       return context
     })
 
@@ -82,71 +51,35 @@ export class EditorComponent implements AfterViewInit {
     })
   }
 
-  // Note that Angular refs can be used once the view is initialized so we need to create
-  // these containers and use in the above editor configuration to workaround this problem.
-  private sidebar = document.createElement('div')
-  private presenceList = document.createElement('div')
-
-  ngAfterViewInit() {
-    if (!this.sidebarContainer || !this.presenceListContainer) {
-      throw new Error('Div containers for sidebar or presence list were not found')
+  ngAfterViewInit(): void {
+    if (!this.sidebarContainer) {
+      throw new Error('Div container for sidebar was not found')
     }
-
     this.sidebarContainer.nativeElement.appendChild(this.sidebar)
-    this.presenceListContainer.nativeElement.appendChild(this.presenceList)
   }
 
-  onClick(event: Event, threadId: number) {
+  onClick(event: Event, threadId: string) {
     const context = this.watchdog.context
     const repository = context.plugins.get('CommentsRepository')
     const channelId = context.config.get('collaboration.channelId')
-
-    // DOM element that is a container for the button and the form field element.
     const fieldHolder = (event.currentTarget as HTMLElement).parentNode
 
     if (!repository.hasCommentThread(threadId)) {
-      // Creates a new, empty, local comment thread.
-      // Creates annotation view (sidebar balloon) for the thread and attaches it to `fieldHolder`.
-      // Sets the comment thread and active and focuses selection in the comment input field.
       repository.openNewCommentThread({ channelId, threadId, target: fieldHolder })
     } else {
-      // Sets the comment as active. Triggers events.
       repository.setActiveCommentThread(threadId)
     }
   }
 
   private initIntegration(context) {
-    const channelId = context.config.get('collaboration.channelId')
-
-    // The new API is available through `ContextRepository` and `Annotations` plugins.
-    // These are context plugins which operate outside of editor instance.
-    //
-    // `CommentsRepository` is all about handling comments. It fires some useful events and
-    // contains methods to handle the comments. See the usage below.
-    //
-    // `Annotations` is about comments balloons and can be used, among others, to implement
-    // your own sidebar.
     const repository = context.plugins.get('CommentsRepository')
     const annotations = context.plugins.get('Annotations')
     const controls = this.customControls
 
-    // Handle non-editor comments that were loaded when comments adapter (context plugin) was initialized.
-    //
-    // At this moment, the initial comments has been loaded by the Cloud Services comments adapter.
-    // Some of them were editor comments and those will be handled by the editor comments plugin.
-    // However, comments set on non-editor fields need to be handled separately.
     for (const thread of repository.getCommentThreads({ channelId })) {
       _handleCommentThread(thread)
     }
 
-    // Handle non-editor comments that are being added to the comments repository.
-    //
-    // Editor comments are handled by the editor comments plugin.
-    // However, comments set on non-editor fields need to be handled separately.
-    // This handles both comments coming from other clients and the comments created locally.
-    //
-    // Note that the event name contains the context `channelId`. This way we are
-    // listening only to the comments added to the context channel (so, added on non-editor fields).
     repository.on(
       'addCommentThread:' + channelId,
       (evt, { threadId }) => {
@@ -155,24 +88,18 @@ export class EditorComponent implements AfterViewInit {
       { priority: 'low' }
     )
 
-    // As above. Listen to non-editor comments that are removed.
     repository.on(
       'removeCommentThread:' + channelId,
       (evt, { threadId }) => {
         const fieldHolder = this.customControls.find(
           (item) => item.nativeElement.id === threadId
         ).nativeElement
-
         fieldHolder.classList.remove('has-comment', 'active')
-
-        // See `_handleCommentThread`.
         annotations.focusTracker.remove(fieldHolder)
       },
       { priority: 'low' }
     )
 
-    // Handle a situation when the active comment changes.
-    // If the active comment is a non-editor comment, there is a need to highlight that field.
     repository.on('change:activeCommentThread', (evt, name, thread) => {
       // Remove highlight from previously highlighted field.
       this.customControls.forEach((item) => {
@@ -191,35 +118,19 @@ export class EditorComponent implements AfterViewInit {
       }
     })
 
-    // Handle new non-editor comment thread.
     function _handleCommentThread(thread) {
-      // DOM element connected with the thread & annotation.
       const fieldHolder = controls.find(
         (container) => container.nativeElement.id === thread.id
       ).nativeElement
 
-      // If the thread is not attached to a DOM element (target) yet, attach it.
-      // `openNewCommentThread` takes `target` parameter and attaches the thread to the target when the thread is being created.
-      // However, comment threads coming from remote clients need to be handled.
-      // Since this function (`_handleCommentThread`) is applied both for remote and local comments thread, we need
-      // to check if the thread was already attached to something.
       if (!thread.isAttached) {
         thread.attachTo(fieldHolder)
       }
 
       // Add highlight to the holder element to show that the field has a comment.
       fieldHolder.classList.add('has-comment')
-
-      // Add `fieldHolder` to appropriate focus trackers.
-      // Annotations use focus trackers to reset active view when annotations becomes focused or blurred.
-      // However, we don't want to unset active annotation when something in `fieldHolder` is clicked.
-      // For that reason, we add `fieldHolder` to those focus trackers.
-      // Thanks to that, whenever `fieldHolder` is focused, given annotation will behave like it is focused too.
-      //
-      // This is too difficult to figure out when creating an integration so it might be changed (simplified) in future.
       const threadView = repository._threadToController.get(thread).view
       const annotationView = annotations.getAnnotationView(threadView)
-
       annotationView.focusTracker.add(fieldHolder)
       annotations.focusTracker.add(fieldHolder)
     }
