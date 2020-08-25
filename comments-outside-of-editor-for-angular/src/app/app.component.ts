@@ -10,7 +10,7 @@ const LOCAL_STORAGE_KEY = 'CKEDITOR_CS_CONFIG';
 	styleUrls: [ './app.component.css' ]
 } )
 export class AppComponent {
-	@ViewChild( 'form', { static: false } ) public form?: NgForm;
+	@ViewChild('form') public form?: NgForm;
 
 	public configurationSet = false;
 	public users = getUsers();
