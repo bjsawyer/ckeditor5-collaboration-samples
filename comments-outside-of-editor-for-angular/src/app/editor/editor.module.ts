@@ -1,19 +1,12 @@
-import { NgModule } from '@angular/core';
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular'
+import { EditorComponent } from './editor.component'
+import { NgModule } from '@angular/core'
 
-import { EditorComponent } from './editor.component';
-
-@NgModule( {
-	declarations: [
-		EditorComponent
-	],
-	imports: [
-		CKEditorModule,
-	],
-	providers: [],
-	bootstrap: [ EditorComponent ],
-	exports: [
-		EditorComponent
-	]
-} )
-export class EditorModule { }
+@NgModule({
+  declarations: [EditorComponent],
+  imports: [CKEditorModule],
+  providers: [],
+  bootstrap: [EditorComponent],
+  exports: [EditorComponent],
+})
+export class EditorModule {}

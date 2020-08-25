@@ -1,176 +1,183 @@
-import { Component, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
-import { CloudServicesConfig } from './editor/common-interfaces';
+import { Component, ViewChild } from '@angular/core'
 
-const LOCAL_STORAGE_KEY = 'CKEDITOR_CS_CONFIG';
+import { CloudServicesConfig } from './editor/common-interfaces'
+import { NgForm } from '@angular/forms'
 
-@Component( {
-	selector: 'app-root',
-	templateUrl: './app.component.html',
-	styleUrls: [ './app.component.css' ]
-} )
+const LOCAL_STORAGE_KEY = 'CKEDITOR_CS_CONFIG'
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+})
 export class AppComponent {
-	@ViewChild('form') public form?: NgForm;
+  @ViewChild('form') public form?: NgForm
 
-	public configurationSet = false;
-	public users = getUsers();
-	public channelId = handleChannelIdInUrl();
-	public config = getStoredConfig();
-	public isWarning = false;
+  public configurationSet = false
+  public users = getUsers()
+  public channelId = handleChannelIdInUrl()
+  public config = getStoredConfig()
+  public isWarning = false
 
-	public selectedUser?: string;
+  public selectedUser?: string
 
-	public handleSubmit() {
-		if ( !this.form || !this.form.valid ) {
-			return;
-		}
+  public handleSubmit() {
+    if (!this.form || !this.form.valid) {
+      return
+    }
 
-		if ( this.isCloudServicesTokenEndpoint() && !this.config.tokenUrl.includes( '?' ) ) {
-			this.isWarning = true;
+    if (this.isCloudServicesTokenEndpoint() && !this.config.tokenUrl.includes('?')) {
+      this.isWarning = true
 
-			return;
-		}
+      return
+    }
 
-		storeConfig( {
-			tokenUrl: getRawTokenUrl( this.config.tokenUrl ),
-			uploadUrl: this.config.uploadUrl,
-			webSocketUrl: this.config.webSocketUrl
-		} );
+    storeConfig({
+      tokenUrl: getRawTokenUrl(this.config.tokenUrl),
+      uploadUrl: this.config.uploadUrl,
+      webSocketUrl: this.config.webSocketUrl,
+    })
 
-		updateChannelIdInUrl( this.channelId );
+    updateChannelIdInUrl(this.channelId)
 
-		this.configurationSet = true;
-	}
+    this.configurationSet = true
+  }
 
-	public handleTokenUrlChange() {
-		this.isWarning = false;
-		this.selectedUser = undefined;
-	}
+  public handleTokenUrlChange() {
+    this.isWarning = false
+    this.selectedUser = undefined
+  }
 
-	public selectUser( user: User ) {
-		this.selectedUser = user.id;
-		this.isWarning = false;
+  public selectUser(user: User) {
+    this.selectedUser = user.id
+    this.isWarning = false
 
-		const keys = Object.keys( user ) as ( keyof User )[];
+    const keys = Object.keys(user) as (keyof User)[]
 
-		this.config.tokenUrl = `${ getRawTokenUrl( this.config.tokenUrl ) }?` + keys
-			.filter( key => user[ key ] )
-			.map( key => {
-				if ( key === 'role' ) {
-					return `${ key }=${ user[ key ] }`;
-				}
+    this.config.tokenUrl =
+      `${getRawTokenUrl(this.config.tokenUrl)}?` +
+      keys
+        .filter((key) => user[key])
+        .map((key) => {
+          if (key === 'role') {
+            return `${key}=${user[key]}`
+          }
 
-				return `user.${ key }=${ user[ key ] }`;
-			} )
-			.join( '&' );
-	}
+          return `user.${key}=${user[key]}`
+        })
+        .join('&')
+  }
 
-	public isCloudServicesTokenEndpoint() {
-		return isCloudServicesTokenEndpoint( this.config.tokenUrl );
-	}
+  public isCloudServicesTokenEndpoint() {
+    return isCloudServicesTokenEndpoint(this.config.tokenUrl)
+  }
 
-	public getUserInitials( name: string ) {
-		return name.split( ' ', 2 ).map( part => part.charAt( 0 ) ).join( '' ).toUpperCase();
-	}
+  public getUserInitials(name: string) {
+    return name
+      .split(' ', 2)
+      .map((part) => part.charAt(0))
+      .join('')
+      .toUpperCase()
+  }
 
-	public onEditorReady( editor ) {
-		console.log( 'Editor is ready to use!', editor );
-	}
+  public onEditorReady(editor) {
+    console.log('Editor is ready to use!', editor)
+  }
 }
 
 function getUsers(): User[] {
-	return [
-		{
-			id: 'e1',
-			name: 'Tom Rowling',
-			avatar: 'https://randomuser.me/api/portraits/men/30.jpg',
-			role: 'writer'
-		},
-		{
-			id: 'e2',
-			name: 'Wei Hong',
-			avatar: 'https://randomuser.me/api/portraits/women/51.jpg',
-			role: 'writer'
-		},
-		{
-			id: 'e3',
-			name: 'Rani Patel',
-			role: 'writer'
-		},
-		{
-			id: 'e4',
-			name: 'Henrik Jensen',
-			role: 'commentator'
-		},
-		{
-			id: randomString(),
-			role: 'writer'
-		},
-		{
-			id: randomString(),
-			role: 'reader'
-		}
-	];
+  return [
+    {
+      id: 'e1',
+      name: 'Tom Rowling',
+      avatar: 'https://randomuser.me/api/portraits/men/30.jpg',
+      role: 'writer',
+    },
+    {
+      id: 'e2',
+      name: 'Wei Hong',
+      avatar: 'https://randomuser.me/api/portraits/women/51.jpg',
+      role: 'writer',
+    },
+    {
+      id: 'e3',
+      name: 'Rani Patel',
+      role: 'writer',
+    },
+    {
+      id: 'e4',
+      name: 'Henrik Jensen',
+      role: 'commentator',
+    },
+    {
+      id: randomString(),
+      role: 'writer',
+    },
+    {
+      id: randomString(),
+      role: 'reader',
+    },
+  ]
 }
 
 interface User {
-	id: string;
-	name?: string;
-	avatar?: string;
-	role?: string;
+  id: string
+  name?: string
+  avatar?: string
+  role?: string
 }
 
 function handleChannelIdInUrl() {
-	let id = getChannelIdFromUrl();
+  let id = getChannelIdFromUrl()
 
-	if ( !id ) {
-		id = randomString();
-		updateChannelIdInUrl( id );
-	}
+  if (!id) {
+    id = randomString()
+    updateChannelIdInUrl(id)
+  }
 
-	return id;
+  return id
 }
 
 function getChannelIdFromUrl() {
-	const channelIdMatch = location.search.match( /channelId=(.+)$/ );
+  const channelIdMatch = location.search.match(/channelId=(.+)$/)
 
-	return channelIdMatch ? decodeURIComponent( channelIdMatch[ 1 ] ) : null;
+  return channelIdMatch ? decodeURIComponent(channelIdMatch[1]) : null
 }
 
 function randomString() {
-	return Math.floor( Math.random() * Math.pow( 2, 52 ) ).toString( 32 );
+  return Math.floor(Math.random() * Math.pow(2, 52)).toString(32)
 }
 
-function storeConfig( csConfig: CloudServicesConfig ) {
-	localStorage.setItem( LOCAL_STORAGE_KEY, JSON.stringify( csConfig ) );
+function storeConfig(csConfig: CloudServicesConfig) {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(csConfig))
 }
 
-function updateChannelIdInUrl( id: string ) {
-	window.history.replaceState( {}, document.title, generateUrlWithChannelId( id ) );
+function updateChannelIdInUrl(id: string) {
+  window.history.replaceState({}, document.title, generateUrlWithChannelId(id))
 }
 
-function generateUrlWithChannelId( id: string ) {
-	return `${ window.location.href.split( '?' )[ 0 ] }?channelId=${ id }`;
+function generateUrlWithChannelId(id: string) {
+  return `${window.location.href.split('?')[0]}?channelId=${id}`
 }
 
-function getRawTokenUrl( url: string ) {
-	if ( isCloudServicesTokenEndpoint( url ) ) {
-		return url.split( '?' )[ 0 ];
-	}
+function getRawTokenUrl(url: string) {
+  if (isCloudServicesTokenEndpoint(url)) {
+    return url.split('?')[0]
+  }
 
-	return url;
+  return url
 }
 
-function isCloudServicesTokenEndpoint( tokenUrl: string ) {
-	return /cke-cs[\w-]*\.com\/token\/dev/.test( tokenUrl );
+function isCloudServicesTokenEndpoint(tokenUrl: string) {
+  return /cke-cs[\w-]*\.com\/token\/dev/.test(tokenUrl)
 }
 
 function getStoredConfig(): CloudServicesConfig {
-	const config = JSON.parse( localStorage.getItem( LOCAL_STORAGE_KEY ) || '{}' );
+  const config = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}')
 
-	return {
-		tokenUrl: config.tokenUrl || '',
-		uploadUrl: config.uploadUrl || '',
-		webSocketUrl: config.webSocketUrl || ''
-	};
+  return {
+    tokenUrl: config.tokenUrl || '',
+    uploadUrl: config.uploadUrl || '',
+    webSocketUrl: config.webSocketUrl || '',
+  }
 }
