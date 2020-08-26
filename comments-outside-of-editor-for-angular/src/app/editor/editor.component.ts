@@ -5,7 +5,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
   OnInit,
   Output,
   QueryList,
@@ -14,7 +13,6 @@ import {
 } from '@angular/core'
 
 import { CKEditor5 } from '@ckeditor/ckeditor5-angular'
-import { CloudServicesConfig } from './common-interfaces'
 
 @Component({
   selector: 'app-editor',
@@ -129,6 +127,14 @@ export class EditorComponent implements OnInit, AfterViewInit {
 
       // Add highlight to the holder element to show that the field has a comment.
       fieldHolder.classList.add('has-comment')
+
+      // Add `fieldHolder` to appropriate focus trackers.
+      // Annotations use focus trackers to reset active view when annotations becomes focused or blurred.
+      // However, we don't want to unset active annotation when something in `fieldHolder` is clicked.
+      // For that reason, we add `fieldHolder` to those focus trackers.
+      // Thanks to that, whenever `fieldHolder` is focused, given annotation will behave like it is focused too.
+      //
+      // This is too difficult to figure out when creating an integration so it might be changed (simplified) in future.
       const threadView = repository._threadToController.get(thread).view
       const annotationView = annotations.getAnnotationView(threadView)
       annotationView.focusTracker.add(fieldHolder)
